@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MySQL Crash Course · Query Reference (Ch. 4–8)</title>
+<meta name="description" content="Every worked SELECT example from MySQL Crash Course chapters 4–8, with copy buttons and downloadable MySQL command-line screenshots in black and white.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root{
+    --bg:#eef1f5; --grid:#e2e7ee; --surface:#ffffff;
+    --border:#d9dfe7; --border-2:#c6cfda;
+    --ink:#152230; --ink-soft:#48586a; --ink-faint:#8091a1;
+    --teal:#00758f; --teal-deep:#005566; --teal-wash:#e2f0f3;
+    --amber:#d97a06; --amber-wash:#fbead2;
+    --radius:12px; --radius-sm:8px;
+    --mono:"IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
+    --sans:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --shadow:0 1px 2px rgba(20,35,55,.05), 0 8px 24px -16px rgba(20,35,55,.22);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth; scroll-padding-top:82px}
+  body{
+    margin:0; font-family:var(--sans); color:var(--ink); background:var(--bg);
+    background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:26px 26px; background-position:-1px -1px;
+    -webkit-font-smoothing:antialiased; line-height:1.5;
+  }
+  a{color:var(--teal); text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 22px}
+
+  /* ---------- hero ---------- */
+  .hero{padding:56px 0 30px}
+  .eyebrow{display:inline-flex; align-items:center; gap:9px; font-family:var(--mono);
+    font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--teal-deep);
+    background:var(--teal-wash); border:1px solid #c6e0e6; padding:6px 11px; border-radius:100px}
+  .eyebrow b{width:7px; height:7px; border-radius:50%; background:var(--amber); display:inline-block}
+  .hero-grid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.02fr); gap:40px; align-items:center; margin-top:22px}
+  h1{font-size:clamp(30px,4.4vw,52px); line-height:1.04; letter-spacing:-.02em; margin:0 0 16px; font-weight:700}
+  h1 .q{color:var(--teal); font-family:var(--mono); font-weight:500; letter-spacing:-.01em}
+  .lede{font-size:18px; color:var(--ink-soft); max-width:46ch; margin:0 0 24px}
+  .hero-actions{display:flex; flex-wrap:wrap; gap:12px}
+
+  /* buttons */
+  .btn{font-family:var(--sans); font-size:14.5px; font-weight:600; cursor:pointer;
+    border-radius:var(--radius-sm); padding:11px 16px; border:1px solid var(--border-2);
+    background:var(--surface); color:var(--ink); display:inline-flex; align-items:center; gap:8px;
+    transition:transform .08s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease}
+  .btn:hover{border-color:var(--teal); box-shadow:var(--shadow)}
+  .btn:active{transform:translateY(1px)}
+  .btn svg{width:16px; height:16px}
+  .btn-primary{background:var(--teal); color:#fff; border-color:var(--teal)}
+  .btn-primary:hover{background:var(--teal-deep); border-color:var(--teal-deep); box-shadow:0 8px 20px -10px rgba(0,117,143,.6)}
+  .btn:focus-visible, a:focus-visible, input:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+
+  /* ---------- terminal (shared look, used in hero + cards) ---------- */
+  .term{border-radius:10px; overflow:hidden; border:1px solid #05202a;
+    box-shadow:0 18px 40px -22px rgba(10,25,40,.55); background:var(--t-bg)}
+  [data-term="dark"] .term{--t-bg:#0c0c0c; --t-bar:#2b2b2b; --t-barink:#d4d4d4; --t-ink:#e8e8e8; --t-out:#dcdcdc; --t-meta:#9a9a9a; --t-btn:#c9c9c9}
+  [data-term="light"] .term{--t-bg:#ffffff; --t-bar:#e4e4e4; --t-barink:#2b2b2b; --t-ink:#141414; --t-out:#242424; --t-meta:#6a6a6a; --t-btn:#3a3a3a; border-color:#c9d0d8}
+  .term-bar{height:34px; background:var(--t-bar); display:flex; align-items:center; padding:0 12px; gap:10px; user-select:none}
+  .term-bar .name{font-family:var(--sans); font-size:12.5px; color:var(--t-barink); font-weight:500}
+  .term-bar .win{margin-left:auto; display:flex; gap:16px; color:var(--t-btn)}
+  .term-bar .win i{width:12px; height:12px; display:inline-block; position:relative}
+  .term-bar .win .mn::after{content:""; position:absolute; left:1px; right:1px; bottom:2px; height:1.4px; background:currentColor}
+  .term-bar .win .mx::after{content:""; position:absolute; inset:1px 1px 2px 1px; border:1.4px solid currentColor}
+  .term-bar .win .cl::before,.term-bar .win .cl::after{content:""; position:absolute; left:50%; top:1px; bottom:1px; width:1.4px; background:currentColor; transform-origin:center}
+  .term-bar .win .cl::before{transform:translateX(-50%) rotate(45deg)}
+  .term-bar .win .cl::after{transform:translateX(-50%) rotate(-45deg)}
+  .term-body{margin:0; padding:14px 16px; background:var(--t-bg); color:var(--t-out);
+    font-family:var(--mono); font-size:13.5px; line-height:1.48; overflow-x:auto; white-space:pre; tab-size:4}
+  .term-body .ti{color:var(--t-ink)}
+  .term-body .to{color:var(--t-out)}
+  .term-body .tm{color:var(--t-meta)}
+  .cursor{display:inline-block; width:8px; height:15px; background:var(--t-ink); vertical-align:-2px; margin-left:1px; animation:blink 1.05s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+
+  /* ---------- sticky bar ---------- */
+  .bar{position:sticky; top:0; z-index:40; background:rgba(238,241,245,.86); backdrop-filter:blur(10px);
+    border-top:1px solid var(--border); border-bottom:1px solid var(--border)}
+  .bar-in{display:flex; align-items:center; gap:10px; padding:11px 0; flex-wrap:wrap}
+  .chips{display:flex; gap:6px; flex-wrap:wrap}
+  .chip{font-family:var(--mono); font-size:13px; font-weight:500; color:var(--ink-soft);
+    border:1px solid var(--border-2); background:var(--surface); border-radius:100px; padding:6px 13px; cursor:pointer; white-space:nowrap}
+  .chip:hover{border-color:var(--teal); color:var(--teal)}
+  .chip b{color:var(--teal); font-weight:600}
+  .bar-spacer{flex:1 1 12px}
+  .search{position:relative; display:flex; align-items:center}
+  .search svg{position:absolute; left:11px; width:15px; height:15px; color:var(--ink-faint); pointer-events:none}
+  .search input{font-family:var(--sans); font-size:14px; color:var(--ink); background:var(--surface);
+    border:1px solid var(--border-2); border-radius:100px; padding:8px 14px 8px 33px; width:210px; transition:width .18s ease, border-color .15s}
+  .search input:focus{width:250px; border-color:var(--teal); outline:none}
+  .toggle{display:inline-flex; border:1px solid var(--border-2); border-radius:100px; background:var(--surface); overflow:hidden; font-family:var(--mono); font-size:12.5px}
+  .toggle button{border:0; background:transparent; padding:7px 12px; cursor:pointer; color:var(--ink-soft); font-family:inherit; font-size:inherit; font-weight:500}
+  .toggle button.on{background:var(--ink); color:#fff}
+
+  /* ---------- data section ---------- */
+  section{padding:46px 0 8px}
+  .sec-head{display:flex; align-items:baseline; gap:16px; margin-bottom:6px; flex-wrap:wrap}
+  .sec-num{font-family:var(--mono); font-size:13px; color:#fff; background:var(--teal); border-radius:7px; padding:5px 10px; font-weight:600; letter-spacing:.02em}
+  .sec-head h2{font-size:26px; letter-spacing:-.01em; margin:0; font-weight:700}
+  .sec-blurb{color:var(--ink-soft); margin:10px 0 26px; max-width:70ch; font-size:15.5px}
+  .divider{font-family:var(--mono); color:var(--border-2); font-size:13px; overflow:hidden; white-space:nowrap; letter-spacing:1px; user-select:none; margin:8px 0 0}
+
+  .data-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden}
+  .data-card .dc-h{padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px}
+  .data-card .dc-h .tbl{font-family:var(--mono); font-weight:600; color:var(--teal-deep)}
+  .data-card .dc-h .meta{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint); margin-left:auto}
+  .tbl-scroll{overflow-x:auto}
+  table.data{border-collapse:collapse; width:100%; font-family:var(--mono); font-size:13px; min-width:520px}
+  table.data th, table.data td{text-align:left; padding:8px 16px; border-bottom:1px solid var(--border); white-space:nowrap}
+  table.data th{background:#f7f9fb; color:var(--ink-soft); font-weight:600; position:sticky; top:0}
+  table.data td.num{text-align:right; font-variant-numeric:tabular-nums}
+  table.data tr:last-child td{border-bottom:0}
+  table.data tbody tr:hover td{background:#f4f8f9}
+  .side-note{margin-top:14px; font-size:14px; color:var(--ink-soft); background:var(--amber-wash); border:1px solid #f0d5aa;
+    border-left:3px solid var(--amber); padding:11px 14px; border-radius:var(--radius-sm)}
+  .side-note code{font-family:var(--mono); font-size:.92em; background:#fff5e6; padding:1px 5px; border-radius:4px}
+
+  /* ---------- query cards ---------- */
+  .cards{display:flex; flex-direction:column; gap:18px}
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden}
+  .card-h{display:flex; align-items:center; gap:12px; padding:15px 18px 13px}
+  .card-tag{font-family:var(--mono); font-size:12.5px; font-weight:600; color:var(--teal); background:var(--teal-wash);
+    border:1px solid #c6e0e6; border-radius:6px; padding:3px 8px; letter-spacing:.02em}
+  .card-title{font-size:16.5px; font-weight:600; margin:0; letter-spacing:-.005em}
+  .card-note{margin:0 18px 4px; font-size:13.5px; color:var(--ink-soft); background:#f6f8fa; border:1px solid var(--border);
+    border-radius:var(--radius-sm); padding:9px 12px}
+  .card-note code{font-family:var(--mono); font-size:.92em; background:#eef1f4; padding:1px 5px; border-radius:4px}
+  .card-grid{display:grid; grid-template-columns:minmax(0,0.86fr) minmax(0,1.14fr); gap:16px; padding:14px 18px 4px; align-items:start}
+
+  .sql{border:1px solid var(--border); border-radius:10px; overflow:hidden; background:#fbfcfd; height:100%; display:flex; flex-direction:column}
+  .sql-h{display:flex; align-items:center; justify-content:space-between; padding:8px 10px 8px 13px; border-bottom:1px solid var(--border); background:#f4f7f9}
+  .sql-h span{font-family:var(--mono); font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); font-weight:500}
+  .btn-copy{font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--teal); background:#fff; border:1px solid var(--border-2);
+    border-radius:6px; padding:5px 11px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:.14s}
+  .btn-copy:hover{border-color:var(--teal)}
+  .btn-copy.ok{color:#fff; background:var(--teal); border-color:var(--teal)}
+  .btn-copy svg{width:13px; height:13px}
+  .sql-body{margin:0; padding:13px 15px; font-family:var(--mono); font-size:13.5px; line-height:1.55; overflow-x:auto; white-space:pre; color:var(--ink); flex:1}
+  .sql-body .k{color:var(--teal); font-weight:600}
+  .sql-body .s{color:var(--amber)}
+  .sql-body .c{color:var(--ink-faint); font-style:italic}
+
+  .card-f{display:flex; align-items:center; gap:9px; padding:6px 18px 16px; flex-wrap:wrap}
+  .card-f .lbl{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); letter-spacing:.1em; text-transform:uppercase; margin-right:2px}
+  .dl{font-family:var(--sans); font-size:13px; font-weight:600; cursor:pointer; border-radius:7px; padding:8px 12px;
+    border:1px solid var(--border-2); background:#fff; color:var(--ink-soft); display:inline-flex; align-items:center; gap:7px; transition:.14s}
+  .dl:hover{border-color:var(--teal); color:var(--teal)}
+  .dl .sw{width:13px; height:13px; border-radius:3px; border:1px solid var(--border-2)}
+  .dl.black .sw{background:#0c0c0c; border-color:#0c0c0c}
+  .dl.white .sw{background:#fff}
+
+  .no-results{display:none; text-align:center; padding:60px 20px; color:var(--ink-faint); font-family:var(--mono)}
+  .no-results.show{display:block}
+
+  /* ---------- footer + toast ---------- */
+  .foot{margin-top:56px; border-top:1px solid var(--border); padding:34px 0 60px; color:var(--ink-soft); font-size:14px}
+  .foot p{margin:5px 0}
+  .foot .mono{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint)}
+  .toast{position:fixed; left:50%; bottom:28px; transform:translate(-50%, 20px); opacity:0; pointer-events:none;
+    background:var(--ink); color:#fff; font-family:var(--sans); font-size:14px; font-weight:500; padding:12px 20px; border-radius:100px;
+    box-shadow:0 12px 30px -8px rgba(0,0,0,.4); transition:opacity .22s, transform .22s; z-index:100; display:flex; align-items:center; gap:10px}
+  .toast.show{opacity:1; transform:translate(-50%,0)}
+  .toast .spin{width:15px; height:15px; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  @media (max-width:860px){
+    .hero-grid{grid-template-columns:1fr; gap:28px}
+    .card-grid{grid-template-columns:1fr}
+    .bar-spacer{flex-basis:100%; height:0}
+    .search input{width:100%}
+    .search{flex:1 1 160px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001ms !important; transition-duration:.001ms !important}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body data-term="dark">
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><b></b>MySQL · WampServer · SQL</span>
+    <div class="hero-grid">
+      <div>
+        <h1>MySQL Crash Course<br><span class="q">SELECT</span> query reference</h1>
+        <p class="lede">Every worked example from Chapters 4–8, ready to copy — each paired with a generated MySQL command-line screenshot you can download in black or white.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="copyAll">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy all queries
+          </button>
+          <button class="btn" id="dlAll">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download all screenshots
+          </button>
+        </div>
+      </div>
+      <div class="term" id="heroTerm" data-hero>
+        <div class="term-bar"><span class="name">MySQL&nbsp;Command&nbsp;Line&nbsp;Client</span><span class="win"><i class="mn"></i><i class="mx"></i><i class="cl"></i></span></div>
+        <pre class="term-body" id="heroBody"></pre>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="bar">
+  <div class="wrap bar-in">
+    <div class="chips" id="chips"></div>
+    <div class="bar-spacer"></div>
+    <label class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" id="search" placeholder="Filter queries…" autocomplete="off" aria-label="Filter queries">
+    </label>
+    <div class="toggle" id="themeToggle" role="group" aria-label="Screenshot theme">
+      <button data-theme="dark" class="on">Black</button>
+      <button data-theme="light">White</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <section id="data">
+    <div class="sec-head"><span class="sec-num">DB</span><h2>The sample tables</h2></div>
+    <p class="sec-blurb">All examples run against the <code style="font-family:var(--mono)">crashcourse</code> database. Most use the <b>products</b> table below; one filtering example reads from the <b>customers</b> table.</p>
+    <div class="data-card">
+      <div class="dc-h"><span class="tbl">products</span><span class="meta" id="prodCount"></span></div>
+      <div class="tbl-scroll"><table class="data" id="prodTable"></table></div>
+    </div>
+    <div class="side-note">The <code>customers</code> table isn't shown in full here. For the <code>IS NULL</code> example, two customers — <b>Mouse House</b> and <b>E Fudd</b> — have no <code>cust_email</code> on file.</div>
+    <p class="divider" aria-hidden="true"></p>
+  </section>
+
+  <div id="chapters"></div>
+
+  <div class="no-results" id="noResults">No queries match that filter.</div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p><b>MySQL Crash Course</b> — Query Reference for Chapters 4–8 (Retrieving, Sorting, Filtering, Advanced Filtering, Wildcards).</p>
+    <p>Screenshots are generated in your browser and rendered to match the MySQL command-line client. Nothing is uploaded.</p>
+    <p class="mono" id="stat"></p>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   1. Sample data — products table (crashcourse DB)
+   ============================================================ */
+const prodName = {ANV01:'.5 ton anvil', ANV02:'1 ton anvil', ANV03:'2 ton anvil', OL1:'Oil can', FU1:'Fuses', SLING:'Sling', TNT1:'TNT (1 stick)', TNT2:'TNT (5 sticks)', FB:'Bird seed', FC:'Carrots', SAFE:'Safe', DTNTR:'Detonator', JP1000:'JetPack 1000', JP2000:'JetPack 2000'};
+const prodPrice = {ANV01:'5.99', ANV02:'9.99', ANV03:'14.99', OL1:'8.99', FU1:'3.42', SLING:'4.49', TNT1:'2.50', TNT2:'10.00', FB:'10.00', FC:'2.50', SAFE:'50.00', DTNTR:'13.00', JP1000:'35.00', JP2000:'55.00'};
+const prodVend  = {ANV01:1001, ANV02:1001, ANV03:1001, OL1:1002, FU1:1002, SLING:1003, TNT1:1003, TNT2:1003, FB:1003, FC:1003, SAFE:1003, DTNTR:1003, JP1000:1005, JP2000:1005};
+const NATURAL = ['ANV01','ANV02','ANV03','OL1','FU1','SLING','TNT1','TNT2','FB','FC','SAFE','DTNTR','JP1000','JP2000'];
+const BY_NAME = ['ANV01','ANV02','ANV03','FB','FC','DTNTR','FU1','JP1000','JP2000','OL1','SAFE','SLING','TNT1','TNT2'];
+
+const COLMETA = {vend_id:'r', prod_id:'l', prod_name:'l', prod_price:'r', cust_name:'l'};
+const cell = (id, c) => c==='prod_id'?id : c==='prod_name'?prodName[id] : c==='prod_price'?prodPrice[id] : c==='vend_id'?String(prodVend[id]) : '';
+const rowsFor = (ids, cols) => ids.map(id => cols.map(c => cell(id, c)));
+
+/* ============================================================
+   2. The 40 worked queries (Ch. 4–8)
+   ============================================================ */
+const CHAPTERS = [
+  {n:4, title:'Retrieving Data', blurb:'The SELECT statement — single columns, multiple columns, all columns, DISTINCT, LIMIT, fully-qualified names, and comments.'},
+  {n:5, title:'Sorting Retrieved Data', blurb:'ORDER BY — sorting on one or more columns, sorting by column position, and controlling direction with DESC.'},
+  {n:6, title:'Filtering Data', blurb:'The WHERE clause — equality and comparison operators, ranges with BETWEEN, and testing for NULL.'},
+  {n:7, title:'Advanced Data Filtering', blurb:'Combining conditions with AND and OR, managing the order of evaluation with parentheses, and using IN and NOT.'},
+  {n:8, title:'Wildcard Filtering', blurb:'The LIKE operator with the % and _ wildcards for pattern matching against string data.'},
+];
+
+const Q = [
+/* ---- Chapter 4 ---- */
+{ch:4, tag:'4.01', title:'Retrieving a single column',
+  sql:`SELECT prod_name\nFROM products;`, cols:['prod_name'], ids:NATURAL},
+{ch:4, tag:'4.02', title:'Retrieving multiple columns',
+  sql:`SELECT prod_id, prod_name, prod_price\nFROM products;`, cols:['prod_id','prod_name','prod_price'], ids:NATURAL},
+{ch:4, tag:'4.03', title:'Retrieving all columns',
+  sql:`SELECT *\nFROM products;`, cols:['prod_id','vend_id','prod_name','prod_price'], ids:NATURAL,
+  note:'The real <code>products</code> table also has a <code>prod_desc</code> column. <code>*</code> returns every column in table-definition order — four are shown here.'},
+{ch:4, tag:'4.04', title:'Retrieving a column with duplicate values',
+  sql:`SELECT vend_id\nFROM products;`, cols:['vend_id'], ids:NATURAL},
+{ch:4, tag:'4.05', title:'Retrieving distinct rows (DISTINCT)',
+  sql:`SELECT DISTINCT vend_id\nFROM products;`, cols:['vend_id'], rows:[['1001'],['1002'],['1003'],['1005']]},
+{ch:4, tag:'4.06', title:'Limiting results (LIMIT)',
+  sql:`SELECT prod_name\nFROM products\nLIMIT 5;`, cols:['prod_name'], ids:NATURAL.slice(0,5)},
+{ch:4, tag:'4.07', title:'Limiting results with an offset',
+  sql:`SELECT prod_name\nFROM products\nLIMIT 5,5;`, cols:['prod_name'], ids:NATURAL.slice(5,10)},
+{ch:4, tag:'4.08', title:'Fully qualified column name',
+  sql:`SELECT products.prod_name\nFROM products;`, cols:['prod_name'], ids:NATURAL},
+{ch:4, tag:'4.09', title:'Fully qualified table name',
+  sql:`SELECT products.prod_name\nFROM crashcourse.products;`, cols:['prod_name'], ids:NATURAL},
+{ch:4, tag:'4.10', title:'Inline comment with --',
+  sql:`SELECT prod_name -- this is a comment\nFROM products;`, cols:['prod_name'], ids:NATURAL,
+  note:'Text after <code>--</code> on a line is ignored, so the result is identical to a plain single-column select.'},
+{ch:4, tag:'4.11', title:'Comment with #',
+  sql:`# This is a comment\nSELECT prod_name\nFROM products;`, cols:['prod_name'], ids:NATURAL},
+{ch:4, tag:'4.12', title:'Multiline comment /* */',
+  sql:`/* SELECT prod_name, vend_id\nFROM products; */\nSELECT prod_name\nFROM products;`, cols:['prod_name'], ids:NATURAL,
+  note:'The first statement is commented out with <code>/* … */</code>, so only the second select runs.'},
+
+/* ---- Chapter 5 ---- */
+{ch:5, tag:'5.01', title:'Sorting by a single column',
+  sql:`SELECT prod_name\nFROM products\nORDER BY prod_name;`, cols:['prod_name'], ids:BY_NAME},
+{ch:5, tag:'5.02', title:'Sorting by multiple columns',
+  sql:`SELECT prod_id, prod_price, prod_name\nFROM products\nORDER BY prod_price, prod_name;`,
+  cols:['prod_id','prod_price','prod_name'], ids:['FC','TNT1','FU1','SLING','ANV01','OL1','ANV02','FB','TNT2','DTNTR','ANV03','JP1000','SAFE','JP2000']},
+{ch:5, tag:'5.03', title:'Sorting by column position',
+  sql:`SELECT prod_id, prod_price, prod_name\nFROM products\nORDER BY 2, 3;`,
+  cols:['prod_id','prod_price','prod_name'], ids:['FC','TNT1','FU1','SLING','ANV01','OL1','ANV02','FB','TNT2','DTNTR','ANV03','JP1000','SAFE','JP2000'],
+  note:'<code>2</code> and <code>3</code> refer to the 2nd and 3rd columns in the SELECT list, so this is equivalent to <code>ORDER BY prod_price, prod_name</code>.'},
+{ch:5, tag:'5.04', title:'Sorting in descending order (DESC)',
+  sql:`SELECT prod_id, prod_price, prod_name\nFROM products\nORDER BY prod_price DESC;`,
+  cols:['prod_id','prod_price','prod_name'], ids:['JP2000','SAFE','JP1000','ANV03','DTNTR','TNT2','FB','ANV02','OL1','ANV01','SLING','FU1','FC','TNT1']},
+{ch:5, tag:'5.05', title:'Descending on price, ascending on name',
+  sql:`SELECT prod_id, prod_price, prod_name\nFROM products\nORDER BY prod_price DESC, prod_name;`,
+  cols:['prod_id','prod_price','prod_name'], ids:['JP2000','SAFE','JP1000','ANV03','DTNTR','FB','TNT2','ANV02','OL1','ANV01','SLING','FU1','FC','TNT1'],
+  note:'<code>DESC</code> applies only to <code>prod_price</code>; within each price, <code>prod_name</code> sorts ascending.'},
+{ch:5, tag:'5.06', title:'Most expensive item (ORDER BY + LIMIT)',
+  sql:`SELECT prod_price\nFROM products\nORDER BY prod_price DESC\nLIMIT 1;`, cols:['prod_price'], rows:[['55.00']]},
+
+/* ---- Chapter 6 ---- */
+{ch:6, tag:'6.01', title:'Filtering by equality',
+  sql:`SELECT prod_name, prod_price\nFROM products\nWHERE prod_price = 2.50;`, cols:['prod_name','prod_price'], ids:['FC','TNT1']},
+{ch:6, tag:'6.02', title:'Matching a string value',
+  sql:`SELECT prod_name, prod_price\nFROM products\nWHERE prod_name = 'fuses';`, cols:['prod_name','prod_price'], ids:['FU1'],
+  note:'By default MySQL matches strings case-insensitively, so <code>fuses</code> matches <code>Fuses</code>.'},
+{ch:6, tag:'6.03', title:'Less than a value',
+  sql:`SELECT prod_name, prod_price\nFROM products\nWHERE prod_price < 10;`, cols:['prod_name','prod_price'], ids:['ANV01','ANV02','FC','FU1','OL1','SLING','TNT1']},
+{ch:6, tag:'6.04', title:'Less than or equal to a value',
+  sql:`SELECT prod_name, prod_price\nFROM products\nWHERE prod_price <= 10;`, cols:['prod_name','prod_price'], ids:['ANV01','ANV02','FB','FC','FU1','OL1','SLING','TNT1','TNT2']},
+{ch:6, tag:'6.05', title:'Checking for non-matches (<>)',
+  sql:`SELECT vend_id, prod_name\nFROM products\nWHERE vend_id <> 1003;`, cols:['vend_id','prod_name'], ids:['ANV01','ANV02','ANV03','FU1','JP1000','JP2000','OL1']},
+{ch:6, tag:'6.06', title:'Non-matches with !=',
+  sql:`SELECT vend_id, prod_name\nFROM products\nWHERE vend_id != 1003;`, cols:['vend_id','prod_name'], ids:['ANV01','ANV02','ANV03','FU1','JP1000','JP2000','OL1'],
+  note:'<code>!=</code> and <code>&lt;&gt;</code> both mean "not equal" — use whichever you prefer.'},
+{ch:6, tag:'6.07', title:'Checking a range with BETWEEN',
+  sql:`SELECT prod_name, prod_price\nFROM products\nWHERE prod_price BETWEEN 5 AND 10;`, cols:['prod_name','prod_price'], ids:['ANV01','ANV02','FB','OL1','TNT2']},
+{ch:6, tag:'6.08', title:'Checking for NULL (no rows)',
+  sql:`SELECT prod_name\nFROM products\nWHERE prod_price IS NULL;`, cols:['prod_name'], rows:[],
+  note:'No product has a NULL price, so MySQL returns an empty set.'},
+{ch:6, tag:'6.09', title:'Finding NULL values in customers',
+  sql:`SELECT cust_name\nFROM customers\nWHERE cust_email IS NULL;`, cols:['cust_name'], rows:[['Mouse House'],['E Fudd']]},
+
+/* ---- Chapter 7 ---- */
+{ch:7, tag:'7.01', title:'Combining conditions with AND',
+  sql:`SELECT prod_id, prod_price, prod_name\nFROM products\nWHERE vend_id = 1003 AND prod_price <= 10;`,
+  cols:['prod_id','prod_price','prod_name'], ids:['FB','FC','SLING','TNT1','TNT2']},
+{ch:7, tag:'7.02', title:'Matching either condition with OR',
+  sql:`SELECT prod_name, prod_price\nFROM products\nWHERE vend_id = 1002 OR vend_id = 1003;`,
+  cols:['prod_name','prod_price'], ids:['DTNTR','FB','FC','FU1','OL1','SAFE','SLING','TNT1','TNT2']},
+{ch:7, tag:'7.03', title:'Order of evaluation without parentheses',
+  sql:`SELECT prod_name, prod_price\nFROM products\nWHERE vend_id = 1002\n   OR vend_id = 1003\n   AND prod_price >= 10;`,
+  cols:['prod_name','prod_price'], ids:['DTNTR','FB','FU1','OL1','SAFE','TNT2'],
+  note:'AND is evaluated before OR, so this reads as "vendor 1002 (any price), or vendor 1003 priced ≥ 10" — probably not what you meant.'},
+{ch:7, tag:'7.04', title:'Grouping conditions with parentheses',
+  sql:`SELECT prod_name, prod_price\nFROM products\nWHERE (vend_id = 1002 OR vend_id = 1003)\n   AND prod_price >= 10;`,
+  cols:['prod_name','prod_price'], ids:['DTNTR','FB','SAFE','TNT2'],
+  note:'Parentheses force the OR first: "either vendor, priced ≥ 10." Always group AND/OR explicitly.'},
+{ch:7, tag:'7.05', title:'Matching a list with IN',
+  sql:`SELECT prod_name, prod_price\nFROM products\nWHERE vend_id IN (1002,1003)\nORDER BY prod_name;`,
+  cols:['prod_name','prod_price'], ids:['FB','FC','DTNTR','FU1','OL1','SAFE','SLING','TNT1','TNT2']},
+{ch:7, tag:'7.06', title:'The OR equivalent of IN',
+  sql:`SELECT prod_name, prod_price\nFROM products\nWHERE vend_id = 1002 OR vend_id = 1003\nORDER BY prod_name;`,
+  cols:['prod_name','prod_price'], ids:['FB','FC','DTNTR','FU1','OL1','SAFE','SLING','TNT1','TNT2']},
+{ch:7, tag:'7.07', title:'Negating a condition with NOT',
+  sql:`SELECT prod_name\nFROM products\nWHERE NOT vend_id = 'DLL01'\nORDER BY prod_name;`,
+  cols:['prod_name'], ids:BY_NAME,
+  note:"The vend_id values here are numeric (1001–1005), so none equal 'DLL01'. NOT therefore matches every row — mirroring the book's example."},
+{ch:7, tag:'7.08', title:'Excluding a list with NOT IN',
+  sql:`SELECT prod_name, prod_price\nFROM products\nWHERE vend_id NOT IN (1002,1003)\nORDER BY prod_name;`,
+  cols:['prod_name','prod_price'], ids:['ANV01','ANV02','ANV03','JP1000','JP2000']},
+
+/* ---- Chapter 8 ---- */
+{ch:8, tag:'8.01', title:'Match the start of a value (jet%)',
+  sql:`SELECT prod_id, prod_name\nFROM products\nWHERE prod_name LIKE 'jet%';`, cols:['prod_id','prod_name'], ids:['JP1000','JP2000']},
+{ch:8, tag:'8.02', title:'Match anywhere (%anvil%)',
+  sql:`SELECT prod_id, prod_name\nFROM products\nWHERE prod_name LIKE '%anvil%';`, cols:['prod_id','prod_name'], ids:['ANV01','ANV02','ANV03']},
+{ch:8, tag:'8.03', title:'Match start and end (s%e)',
+  sql:`SELECT prod_name\nFROM products\nWHERE prod_name LIKE 's%e';`, cols:['prod_name'], ids:['SAFE'],
+  note:'Reconstructed result — the book omits this output. Only <code>Safe</code> starts with <code>s</code> and ends with <code>e</code>.'},
+{ch:8, tag:'8.04', title:'Single-character wildcard (_)',
+  sql:`SELECT prod_id, prod_name\nFROM products\nWHERE prod_name LIKE '_ ton anvil';`, cols:['prod_id','prod_name'], ids:['ANV02','ANV03'],
+  note:'<code>_</code> matches exactly one character, so <code>.5 ton anvil</code> is excluded.'},
+{ch:8, tag:'8.05', title:'Multi-character wildcard (%)',
+  sql:`SELECT prod_id, prod_name\nFROM products\nWHERE prod_name LIKE '% ton anvil';`, cols:['prod_id','prod_name'], ids:['ANV01','ANV02','ANV03']},
+];
+
+// Resolve rows + aligns + filenames
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+Q.forEach(q => {
+  if(!q.rows) q.rows = rowsFor(q.ids, q.cols);
+  q.aligns = q.cols.map(c => COLMETA[c] || 'l');
+  q.file = 'q' + q.tag.replace('.','-') + '-' + slug(q.title);
+  q.searchText = (q.tag + ' ' + q.title + ' ' + q.sql).toLowerCase();
+});
+
+/* ============================================================
+   3. MySQL ASCII table + terminal lines
+   ============================================================ */
+function asciiTable(cols, rows, aligns){
+  const w = cols.map((c,i) => {
+    let m = String(c).length;
+    for(const r of rows) m = Math.max(m, String(r[i]).length);
+    return m;
+  });
+  const bar = '+' + w.map(x => '-'.repeat(x+2)).join('+') + '+';
+  const padL = (s,n) => ' ' + s + ' '.repeat(n - s.length) + ' ';
+  const padR = (s,n) => ' ' + ' '.repeat(n - s.length) + s + ' ';
+  const header = '|' + cols.map((c,i) => padL(String(c), w[i])).join('|') + '|';
+  const body = rows.map(r => '|' + r.map((v,i) => (aligns[i]==='r'?padR:padL)(String(v), w[i])).join('|') + '|');
+  return [bar, header, bar, ...body, bar];
+}
+function terminalLines(q){
+  const lines = [];
+  q.sql.split('\n').forEach((s,i) => lines.push({t:(i===0?'mysql> ':'    -> ') + s, k:'in'}));
+  if(q.rows.length === 0){
+    lines.push({t:'Empty set (0.00 sec)', k:'meta'});
+  } else {
+    asciiTable(q.cols, q.rows, q.aligns).forEach(t => lines.push({t, k:'out'}));
+    const n = q.rows.length;
+    lines.push({t:`${n} row${n===1?'':'s'} in set (0.00 sec)`, k:'meta'});
+  }
+  return lines;
+}
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function previewHTML(q){
+  return terminalLines(q).map(l => {
+    const cls = l.k==='in' ? 'ti' : l.k==='meta' ? 'tm' : 'to';
+    return `<span class="${cls}">${esc(l.t) || ' '}</span>`;
+  }).join('\n');
+}
+
+/* ============================================================
+   4. SQL syntax highlighting (comment- and string-aware)
+   ============================================================ */
+const KW = new Set(['SELECT','FROM','WHERE','ORDER','BY','LIMIT','OFFSET','DISTINCT','AND','OR','NOT','IN','BETWEEN','LIKE','IS','NULL','ASC','DESC','AS']);
+function highlightSQL(sql){
+  let out = '', i = 0; const n = sql.length;
+  const word = c => /[A-Za-z0-9_]/.test(c);
+  while(i < n){
+    const rest = sql.slice(i);
+    if(rest.startsWith('--') || sql[i]==='#'){
+      const e = sql.indexOf('\n', i); const s = e===-1?n:e;
+      out += `<span class="c">${esc(sql.slice(i,s))}</span>`; i = s; continue;
+    }
+    if(rest.startsWith('/*')){
+      const e = sql.indexOf('*/', i); const s = e===-1?n:e+2;
+      out += `<span class="c">${esc(sql.slice(i,s))}</span>`; i = s; continue;
+    }
+    if(sql[i]==="'"){
+      let j = i+1; while(j<n && sql[j]!=="'") j++; j = Math.min(j+1, n);
+      out += `<span class="s">${esc(sql.slice(i,j))}</span>`; i = j; continue;
+    }
+    if(word(sql[i])){
+      let j = i; while(j<n && word(sql[j])) j++;
+      const wd = sql.slice(i,j);
+      out += KW.has(wd.toUpperCase()) ? `<span class="k">${esc(wd)}</span>` : esc(wd);
+      i = j; continue;
+    }
+    out += esc(sql[i]); i++;
+  }
+  return out;
+}
+
+/* ============================================================
+   5. Canvas → PNG (renders the MySQL console window)
+   ============================================================ */
+const SANS = '"IBM Plex Sans", system-ui, sans-serif';
+const MONO = '"IBM Plex Mono", Consolas, "DejaVu Sans Mono", monospace';
+function renderCanvas(q, theme){
+  const S=2, fs=14, lh=20, padX=16, padY=14, barH=34;
+  const lines = terminalLines(q);
+  const probe = document.createElement('canvas').getContext('2d');
+  probe.font = `${fs}px ${MONO}`;
+  let maxW = 0; for(const l of lines) maxW = Math.max(maxW, probe.measureText(l.t).width);
+  probe.font = `13px ${SANS}`;
+  const title = 'MySQL Command Line Client';
+  const titleW = probe.measureText(title).width;
+  const W = Math.ceil(Math.max(maxW + padX*2, titleW + 130, 380));
+  const contentH = lines.length*lh + padY*2;
+  const H = barH + contentH;
+
+  const c = document.createElement('canvas');
+  c.width = W*S; c.height = H*S;
+  const x = c.getContext('2d');
+  x.scale(S,S);
+
+  const col = theme==='dark'
+    ? {bg:'#0c0c0c', bar:'#2b2b2b', barink:'#d4d4d4', ink:'#e8e8e8', out:'#dcdcdc', meta:'#9a9a9a', btn:'#c9c9c9'}
+    : {bg:'#ffffff', bar:'#e4e4e4', barink:'#2b2b2b', ink:'#141414', out:'#242424', meta:'#6a6a6a', btn:'#3a3a3a'};
+
+  x.fillStyle = col.bg; x.fillRect(0, barH, W, contentH);
+  x.fillStyle = col.bar; x.fillRect(0, 0, W, barH);
+  x.fillStyle = col.barink; x.textBaseline = 'middle'; x.font = `13px ${SANS}`;
+  x.fillText(title, 14, barH/2 + 1);
+
+  // window buttons (Windows-style, right side)
+  x.strokeStyle = col.btn; x.lineWidth = 1.4;
+  const cy = barH/2, slot = 26; let bx = W - 16;
+  x.beginPath(); x.moveTo(bx-5, cy-5); x.lineTo(bx+5, cy+5); x.moveTo(bx+5, cy-5); x.lineTo(bx-5, cy+5); x.stroke(); // close
+  bx -= slot; x.strokeRect(bx-5, cy-5, 10, 10);                                                                     // maximize
+  bx -= slot; x.beginPath(); x.moveTo(bx-5, cy+5); x.lineTo(bx+5, cy+5); x.stroke();                                // minimize
+
+  x.textBaseline = 'top'; x.font = `${fs}px ${MONO}`;
+  lines.forEach((l,i) => {
+    x.fillStyle = l.k==='in' ? col.ink : l.k==='meta' ? col.meta : col.out;
+    x.fillText(l.t, padX, barH + padY + i*lh);
+  });
+  return c;
+}
+const canvasBlob = c => new Promise(r => c.toBlob(r, 'image/png'));
+function triggerDownload(blob, name){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+}
+async function downloadOne(q, theme){
+  await document.fonts.ready;
+  const blob = await canvasBlob(renderCanvas(q, theme));
+  triggerDownload(blob, `${q.file}-${theme==='dark'?'black':'white'}.png`);
+  toast(`Saved ${theme==='dark'?'black':'white'} screenshot`);
+}
+async function downloadAll(){
+  if(typeof JSZip === 'undefined'){ toast('Could not load the zip library — check your connection.'); return; }
+  await document.fonts.ready;
+  toast('Building screenshots…', true);
+  const zip = new JSZip();
+  const black = zip.folder('black-background');
+  const white = zip.folder('white-background');
+  for(const q of Q){
+    black.file(`${q.file}.png`, await canvasBlob(renderCanvas(q, 'dark')));
+    white.file(`${q.file}.png`, await canvasBlob(renderCanvas(q, 'light')));
+    await new Promise(r => setTimeout(r, 0)); // yield so UI stays responsive
+  }
+  const content = await zip.generateAsync({type:'blob'});
+  triggerDownload(content, 'mysql-crashcourse-ch4-8-screenshots.zip');
+  toast(`Downloaded ${Q.length*2} screenshots`);
+}
+
+/* ============================================================
+   6. Copy
+   ============================================================ */
+async function copyText(text, btn){
+  try { await navigator.clipboard.writeText(text); }
+  catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); } catch(_){}
+    ta.remove();
+  }
+  if(btn){
+    const svg = btn.querySelector('svg'); const label = btn.querySelector('.lbl-txt');
+    btn.classList.add('ok'); if(label) label.textContent = 'Copied';
+    setTimeout(() => { btn.classList.remove('ok'); if(label) label.textContent = 'Copy'; }, 1400);
+  }
+}
+function copyAllQueries(){
+  let out = '-- ============================================================\n';
+  out += '-- MySQL Crash Course · Query Reference (Chapters 4–8)\n';
+  out += '-- ============================================================\n';
+  let currentCh = null;
+  Q.forEach(q => {
+    if(q.ch !== currentCh){
+      currentCh = q.ch;
+      const meta = CHAPTERS.find(c => c.n === q.ch);
+      out += `\n\n-- ------------------------------------------------------------\n`;
+      out += `-- Chapter ${meta.n}: ${meta.title}\n`;
+      out += `-- ------------------------------------------------------------\n`;
+    }
+    out += `\n-- ${q.tag}  ${q.title}\n${q.sql}\n`;
+  });
+  copyText(out.trim() + '\n', null);
+  toast(`Copied all ${Q.length} queries`);
+}
+
+/* ============================================================
+   7. Toast
+   ============================================================ */
+let toastTimer;
+function toast(msg, loading){
+  const el = document.getElementById('toast');
+  el.innerHTML = (loading ? '<span class="spin"></span>' : '') + `<span>${msg}</span>`;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  if(!loading) toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+/* ============================================================
+   8. Build the page
+   ============================================================ */
+function buildProductsTable(){
+  const cols = ['vend_id','prod_id','prod_name','prod_price'];
+  const t = document.getElementById('prodTable');
+  const head = '<thead><tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr></thead>';
+  const rows = NATURAL.map(id => '<tr>' + cols.map(c => {
+    const num = (c==='vend_id' || c==='prod_price');
+    return `<td class="${num?'num':''}">${esc(cell(id,c))}</td>`;
+  }).join('') + '</tr>').join('');
+  t.innerHTML = head + '<tbody>' + rows + '</tbody>';
+  document.getElementById('prodCount').textContent = NATURAL.length + ' rows · 4 columns';
+}
+
+const ICON_COPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const ICON_DL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+
+function cardHTML(q){
+  const note = q.note ? `<div class="card-note">${q.note}</div>` : '';
+  return `
+  <article class="card" data-search="${esc(q.searchText)}">
+    <div class="card-h">
+      <span class="card-tag">${q.tag}</span>
+      <h3 class="card-title">${esc(q.title)}</h3>
+    </div>
+    ${note}
+    <div class="card-grid">
+      <div class="sql">
+        <div class="sql-h">
+          <span>SQL</span>
+          <button class="btn-copy" data-copy="${q.file}">${ICON_COPY}<span class="lbl-txt">Copy</span></button>
+        </div>
+        <pre class="sql-body"><code>${highlightSQL(q.sql)}</code></pre>
+      </div>
+      <div class="result">
+        <div class="term">
+          <div class="term-bar"><span class="name">MySQL&nbsp;Command&nbsp;Line&nbsp;Client</span><span class="win"><i class="mn"></i><i class="mx"></i><i class="cl"></i></span></div>
+          <pre class="term-body">${previewHTML(q)}</pre>
+        </div>
+      </div>
+    </div>
+    <div class="card-f">
+      <span class="lbl">Screenshot</span>
+      <button class="dl black" data-dl="${q.file}" data-theme="dark"><span class="sw"></span>Black PNG</button>
+      <button class="dl white" data-dl="${q.file}" data-theme="light"><span class="sw"></span>White PNG</button>
+      <button class="dl" data-dl-copy="${q.file}">${ICON_COPY}Copy SQL</button>
+    </div>
+  </article>`;
+}
+
+const byFile = {}; Q.forEach(q => byFile[q.file] = q);
+
+function buildChapters(){
+  const host = document.getElementById('chapters');
+  const chips = document.getElementById('chips');
+  let html = '', chipsHtml = '';
+  CHAPTERS.forEach(ch => {
+    const items = Q.filter(q => q.ch === ch.n);
+    chipsHtml += `<a class="chip" href="#ch${ch.n}"><b>${ch.n}</b>&nbsp;${esc(ch.title)}</a>`;
+    html += `
+    <section class="chapter" id="ch${ch.n}">
+      <div class="sec-head"><span class="sec-num">CH&nbsp;${ch.n}</span><h2>${esc(ch.title)}</h2></div>
+      <p class="sec-blurb">${esc(ch.blurb)}</p>
+      <div class="cards">${items.map(cardHTML).join('')}</div>
+      <p class="divider" aria-hidden="true"></p>
+    </section>`;
+  });
+  host.innerHTML = html;
+  chips.innerHTML = chipsHtml;
+}
+
+function makeDividers(){
+  document.querySelectorAll('.divider').forEach(d => {
+    d.textContent = '+' + '----+'.repeat(60);
+  });
+}
+
+/* ---- hero terminal ---- */
+function buildHero(){
+  const heroQ = {
+    sql:`SELECT prod_name, prod_price\nFROM products\nORDER BY prod_price DESC\nLIMIT 3;`,
+    cols:['prod_name','prod_price'], aligns:['l','r'],
+    rows:[['JetPack 2000','55.00'],['Safe','50.00'],['JetPack 1000','35.00']]
+  };
+  const banner = [
+    {t:'Enter password: ******', k:'in'},
+    {t:'Welcome to the MySQL monitor.  Commands end with ; or \\g.', k:'out'},
+    {t:'Your MySQL connection id is 8', k:'out'},
+    {t:'Server version: 8.0.36 MySQL Community Server - GPL', k:'out'},
+    {t:'', k:'out'},
+  ];
+  const lines = banner.concat(terminalLines(heroQ));
+  let html = lines.map(l => {
+    const cls = l.k==='in' ? 'ti' : l.k==='meta' ? 'tm' : 'to';
+    return `<span class="${cls}">${esc(l.t) || ' '}</span>`;
+  }).join('\n');
+  html += `\n<span class="ti">mysql&gt; <span class="cursor"></span></span>`;
+  document.getElementById('heroBody').innerHTML = html;
+}
+
+/* ---- filter ---- */
+function wireSearch(){
+  const input = document.getElementById('search');
+  const noRes = document.getElementById('noResults');
+  input.addEventListener('input', () => {
+    const term = input.value.trim().toLowerCase();
+    let visible = 0;
+    document.querySelectorAll('.card').forEach(card => {
+      const match = !term || card.dataset.search.includes(term);
+      card.style.display = match ? '' : 'none';
+      if(match) visible++;
+    });
+    document.querySelectorAll('.chapter').forEach(sec => {
+      const any = sec.querySelector('.card:not([style*="display: none"])');
+      sec.style.display = any ? '' : 'none';
+    });
+    noRes.classList.toggle('show', visible === 0);
+  });
+}
+
+/* ---- theme toggle ---- */
+function wireTheme(){
+  const grp = document.getElementById('themeToggle');
+  grp.addEventListener('click', e => {
+    const btn = e.target.closest('button'); if(!btn) return;
+    document.body.setAttribute('data-term', btn.dataset.theme);
+    grp.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn));
+  });
+}
+
+/* ---- event delegation for buttons ---- */
+function wireButtons(){
+  document.getElementById('copyAll').addEventListener('click', copyAllQueries);
+  document.getElementById('dlAll').addEventListener('click', downloadAll);
+  document.body.addEventListener('click', e => {
+    const copyBtn = e.target.closest('[data-copy]');
+    if(copyBtn){ copyText(byFile[copyBtn.dataset.copy].sql, copyBtn); return; }
+    const copyBtn2 = e.target.closest('[data-dl-copy]');
+    if(copyBtn2){ copyText(byFile[copyBtn2.dataset.dlCopy].sql, null); toast('Copied SQL'); return; }
+    const dlBtn = e.target.closest('[data-dl]');
+    if(dlBtn){ downloadOne(byFile[dlBtn.dataset.dl], dlBtn.dataset.theme); return; }
+  });
+}
+
+/* ---- init ---- */
+buildProductsTable();
+buildChapters();
+makeDividers();
+buildHero();
+wireSearch();
+wireTheme();
+wireButtons();
+document.getElementById('stat').textContent =
+  `${Q.length} queries · ${Q.length*2} screenshots available · rendered client-side with <canvas>`;
+</script>
+</body>
+</html>
